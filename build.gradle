@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+}
+
+wrapper {
+    gradleVersion = "8.10.2"
+}
+
+repositories {
+    mavenCentral()
+}
+
+group = "com.example.cucumberjvm"
+version = "1.0-SNAPSHOT"
+
+def allureVersion = "2.29.0"
+def cucumberVersion = "7.20.1"
+def aspectJVersion = "1.9.22"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("-parameters")
+}
+
+configurations {
+    agent {
+        canBeResolved = true
+        canBeConsumed = true
+    }
+}
+
+dependencies {
+    agent "org.aspectj:aspectjweaver:$aspectJVersion"
+    
+    testImplementation platform("io.cucumber:cucumber-bom:$cucumberVersion")
+    testImplementation "io.cucumber:cucumber-java"
+    testImplementation "io.cucumber:cucumber-testng"
+
+    testImplementation platform("io.qameta.allure:allure-bom:$allureVersion")
+    testImplementation "io.qameta.allure:allure-cucumber7-jvm"
+    testImplementation "io.qameta.allure:allure-testng"
+
+    testImplementation "org.slf4j:slf4j-simple:2.0.16"
+}
+
+test {
+    ignoreFailures = true
+    useTestNG()
+    jvmArgs = [ "-javaagent:${configurations.agent.singleFile}" ]
+}
